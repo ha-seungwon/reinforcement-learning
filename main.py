@@ -1,26 +1,26 @@
 import argparse
-import matplotlib.pyplot as plt
 import warnings
 from train import train
 from test import test
+from plot_test import performance_comparison_plot
+from arguments import set_parameters
 warnings.filterwarnings("ignore")
 
-def plot_rewards(env_list, model_list, all_rewards):
-    fig, axes = plt.subplots(len(env_list), len(model_list), figsize=(15, 15))
-    fig.suptitle('Rewards per Episode for Different Environments and Models', fontsize=16)
 
-    for i, env in enumerate(env_list):
-        for j, model in enumerate(model_list):
-            rewards = all_rewards[i][j]
-            axes[i, j].plot(rewards)
-            axes[i, j].set_title(f'{env} - {model}')
-            axes[i, j].set_xlabel('Episodes')
-            axes[i, j].set_ylabel('Rewards')
+def train_performance_comparison(args,model_list):
+    env_list = ['cliffwalking', 'frozenlake', 'taxi']
+    plot_result = {env: {model: [] for model in model_list} for env in env_list}
 
-    plt.tight_layout()
-    plt.subplots_adjust(top=0.9)
-    plt.show()
+    for env in env_list:
+        for model in model_list:
+            args.env_name = env
+            args.model_name = model
+            args = set_parameters(args)
+            _, rewards_per_episode = train(args)
+            test(args)
+            plot_result[env][model] = rewards_per_episode
 
+    performance_comparison_plot(env_list, model_list, plot_result)
 
 def main():
     parser = argparse.ArgumentParser()
@@ -28,38 +28,32 @@ def main():
     parser.add_argument('--env_name', type=str, default='cliffwalking', help='Name of the env')
     parser.add_argument('--alpha', type=float, default=0.1, help='Learning rate')
     parser.add_argument('--gamma', type=float, default=0.99, help='Discount factor')
-    parser.add_argument('--epsilon', type=float, default=0.45, help='Exploration rate')
-    parser.add_argument('--td_lambda', type=bool, default=False, help='TD lambda')
-    parser.add_argument('--td_lambda_lambda', type=float, default=0.1, help='TD lambda rate')
-    parser.add_argument('--td_lambda_dir', type=str, default='forward', help='TD lambda diraction')
-    parser.add_argument('--batch_size', type=int, default='32', help='DQN batch size')
+    parser.add_argument('--epsilon', type=float, default=0.5, help='Exploration rate')
+    parser.add_argument('--glie', type=bool, default=True, help='MC glie')
+    parser.add_argument('--glie_update_time', type=int, default=10, help='glie_update_time')
+    parser.add_argument('--batch_size', type=int, default=16, help='DQN batch size')
     parser.add_argument('--threshold', type=int, default=500, help='DQN target network update threshold')
-    parser.add_argument('--num_episodes', type=int, default=3000, help='Number of training episodes')
+    parser.add_argument('--num_episodes', type=int, default=500, help='Number of training episodes')
     args, unknown = parser.parse_known_args()
 
     # env_list = ['cliffwalking', 'frozenlake', 'taxi']
-    # model_list = ["q_learning", "sarsa" ]  # "TD" "MC" "q_learning", "sarsa" , "dqn"
-    #
-    # all_rewards = []
-    #
-    # for env in env_list:
-    #     print(f"env is {env}")
-    #     model_rewards_per_episode = []
-    #     for model in model_list:
-    #         print(f"model is {model}")
-    #         args.env_name = env
-    #         args.model_name = model
-    #         _, rewards_per_episode = train(args)
-    #         test(args)
-    #         model_rewards_per_episode.append(rewards_per_episode)
-    #     all_rewards.append(model_rewards_per_episode)
-
+    # model_list = ["Q_learning", "TD" ]  #  "MC", "TD", "Q_learning", "SARSA" , "DQN"
     args.env_name = 'cliffwalking'
-    args.model_name = 'dqn'
+    args.model_name = 'DQN'
+    args= set_parameters(args)
     _, rewards_per_episode = train(args)
     test(args)
 
-    #plot_rewards(env_list, model_list, all_rewards)
+
+
+
+    # MC_TD running rate test
+    # model_list=["Q_learning","SARSA"]
+    # train_performance_comparison(args,model_list)
+
+
+
+
 
 
 if __name__ == '__main__':

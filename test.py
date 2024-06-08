@@ -6,11 +6,11 @@ import numpy as np
 def test(args, num_episodes=1):
     print("test start")
     if args.env_name == 'frozenlake':
-        env = gym.make('FrozenLake-v1', render_mode='human', desc=None, map_name="4x4", is_slippery=False)
+        env = gym.make('FrozenLake-v1', desc=None, map_name="4x4", is_slippery=False,render_mode='human') #render_mode='human',
     elif args.env_name == 'cliffwalking':
-        env = gym.make('CliffWalking-v0', render_mode='human')
+        env = gym.make('CliffWalking-v0',render_mode='human')#, render_mode='human')
     elif args.env_name == 'taxi':
-        env = gym.make('Taxi-v3', render_mode='human')
+        env = gym.make('Taxi-v3',render_mode='human')#, render_mode='human')
 
     with open(f"models/{args.model_name}_{args.env_name}_q_table.pkl", "rb") as f:
         q_table = pickle.load(f)
