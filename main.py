@@ -2,25 +2,12 @@ import argparse
 import warnings
 from train import train
 from test import test
-from plot_test import performance_comparison_plot
 from arguments import set_parameters
+from plot_utils import plot_rewards, plot_loss,plot_rewards_all_models ,plot_rewards_mc_td_lr, plot_rewards_mc_glie_models # 여기서 임포트
+import numpy as np
+from test_model import model_test
 warnings.filterwarnings("ignore")
 
-
-def train_performance_comparison(args,model_list):
-    env_list = ['cliffwalking', 'frozenlake', 'taxi']
-    plot_result = {env: {model: [] for model in model_list} for env in env_list}
-
-    for env in env_list:
-        for model in model_list:
-            args.env_name = env
-            args.model_name = model
-            args = set_parameters(args)
-            _, rewards_per_episode = train(args)
-            test(args)
-            plot_result[env][model] = rewards_per_episode
-
-    performance_comparison_plot(env_list, model_list, plot_result)
 
 def main():
     parser = argparse.ArgumentParser()
@@ -31,26 +18,24 @@ def main():
     parser.add_argument('--epsilon', type=float, default=0.5, help='Exploration rate')
     parser.add_argument('--glie', type=bool, default=True, help='MC glie')
     parser.add_argument('--glie_update_time', type=int, default=10, help='glie_update_time')
-    parser.add_argument('--batch_size', type=int, default=16, help='DQN batch size')
-    parser.add_argument('--threshold', type=int, default=500, help='DQN target network update threshold')
-    parser.add_argument('--num_episodes', type=int, default=500, help='Number of training episodes')
+    parser.add_argument('--hidden_dim', type=int, default=64, help='DQN batch size')
+    parser.add_argument('--batch_size', type=int, default=32, help='DQN batch size')
+    parser.add_argument('--threshold', type=int, default=40, help='DQN target network update threshold')
+    parser.add_argument('--num_episodes', type=int, default=800, help='Number of training episodes')
+    parser.add_argument('--plot_train_test', type=bool, default=False, help='Number of training episodes')
     args, unknown = parser.parse_known_args()
 
-    # env_list = ['cliffwalking', 'frozenlake', 'taxi']
-    # model_list = ["Q_learning", "TD" ]  #  "MC", "TD", "Q_learning", "SARSA" , "DQN"
+    env_list = ['cliffwalking', 'frozenlake', 'taxi']
+    model_list = ["Q_learning", "TD","SARSA","MC","DQN"]  #  "MC", "TD", "Q_learning", "SARSA" , "DQN"
     args.env_name = 'cliffwalking'
     args.model_name = 'DQN'
     args= set_parameters(args)
-    _, rewards_per_episode = train(args)
+    print(args)
+    _, rewards_per_episode, loss_per_episode,_ = train(args)
     test(args)
 
 
-
-
-    # MC_TD running rate test
-    # model_list=["Q_learning","SARSA"]
-    # train_performance_comparison(args,model_list)
-
+    #model_test(args,'dqn_test')
 
 
 
