@@ -1,6 +1,7 @@
 # reinforcement-learning
 
 CliffWalking-v0
+
  <img width="450" alt="image" src="https://github.com/ha-seungwon/reinforcement-learning/assets/74447373/1be6d143-859f-40cf-99bf-41c993fc6400">
 
 Action Space 
@@ -20,6 +21,7 @@ Rewards
 ( 추가적으로 학습 중reward에 대한 변화를 확실히 하고자 -100 -> -10 , final goal : +10으로 수정하였습니다.
 
 FrozenLake-v1
+
  <img width="221" alt="image" src="https://github.com/ha-seungwon/reinforcement-learning/assets/74447373/fc7e12c3-9a0b-4e8b-b0d9-9e061a61f8f4">
 
 Action Space
@@ -40,6 +42,7 @@ Rewards
 
 
 Taxi-v3
+
  <img width="290" alt="image" src="https://github.com/ha-seungwon/reinforcement-learning/assets/74447373/a844e24c-a8a9-4e18-849b-3273ae94293a">
 
 Action Space
