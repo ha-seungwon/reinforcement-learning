@@ -5,18 +5,16 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import arguments
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def test(args):
-    if args.model_name == 'DQN':
+    if args.model_name == 'DQN' or args.model_name=='DQN_P':
         test_dqn(args)
     else:
         test_(args)
 
 class DQN(nn.Module):
-    def __init__(self, num_inputs, num_outputs, args):
+    def __init__(self, num_inputs, num_outputs,args):
         super(DQN, self).__init__()
         self.fc1 = nn.Linear(num_inputs, args.hidden_dim)
         self.fc2 = nn.Linear(args.hidden_dim, args.hidden_dim)
@@ -27,6 +25,7 @@ class DQN(nn.Module):
         x = F.relu(self.fc2(x))
         return self.fc3(x)
 
+
 def one_hot_encode(state, state_dim):
     one_hot = np.zeros(state_dim)
     one_hot[state] = 1
@@ -35,11 +34,11 @@ def one_hot_encode(state, state_dim):
 def test_(args, num_episodes=1):
     print("test start")
     if args.env_name == 'frozenlake':
-        env = gym.make('FrozenLake-v1', desc=None, map_name="4x4", is_slippery=False)
+        env = gym.make('FrozenLake-v1', desc=None, map_name="4x4", is_slippery=False)#,render_mode='human')
     elif args.env_name == 'cliffwalking':
         env = gym.make('CliffWalking-v0')
     elif args.env_name == 'taxi':
-        env = gym.make('Taxi-v3')#render_mode='human'
+        env = gym.make('Taxi-v3')
 
     with open(f"models/{args.model_name}_{args.env_name}_q_table.pkl", "rb") as f:
         q_table = pickle.load(f)
@@ -83,15 +82,19 @@ def test_(args, num_episodes=1):
 def test_dqn(args):
     print("dqn test start")
     if args.env_name == 'frozenlake':
-        env = gym.make('FrozenLake-v1', desc=None, map_name="4x4", is_slippery=False, max_episode_steps=400)
+        env = gym.make('FrozenLake-v1', desc=None, map_name="4x4", is_slippery=False, max_episode_steps=400,render_mode='human')
     elif args.env_name == 'cliffwalking':
-        env = gym.make('CliffWalking-v0', max_episode_steps=200)
+        env = gym.make('CliffWalking-v0', max_episode_steps=200,render_mode='human')
     elif args.env_name == 'taxi':
-        env = gym.make('Taxi-v3', max_episode_steps=400)
+        env = gym.make('Taxi-v3', max_episode_steps=400,render_mode='human')
 
     state_dim = env.observation_space.n
     action_dim = env.action_space.n
-    q = DQN(state_dim, action_dim, args).to(device)
+    if args.model_name =='DQN_P':
+        q = PolicyNetwork(state_dim,action_dim,args).to(device)
+    else:
+        q = DQN(state_dim, action_dim, args).to(device)
+    print(q)
     q.load_state_dict(torch.load(f"models/{args.model_name}_{args.env_name}_dqn_model.pt"))
 
     rewards_per_episode = []
@@ -121,3 +124,22 @@ def epsilon_greedy_policy_dqn(state, model, epsilon, env):
             state = torch.tensor([state], device=device, dtype=torch.float32)
             q_values = model(state)
             return q_values.argmax().item()
+
+
+def select_action(policy, state):
+    state = torch.from_numpy(state).float().unsqueeze(0).to(device)
+    probs = policy(state)
+    action = np.random.choice(len(probs[0]), p=probs.cpu().detach().numpy()[0])
+    return action, torch.log(probs.squeeze(0)[action])
+
+
+class PolicyNetwork(nn.Module):
+    def __init__(self, state_dim, action_dim, args):
+        super(PolicyNetwork, self).__init__()
+        self.fc1 = nn.Linear(state_dim, args.hidden_dim)
+        self.fc2 = nn.Linear(args.hidden_dim, action_dim)
+
+    def forward(self, x):
+        x = torch.relu(self.fc1(x))
+        x = torch.softmax(self.fc2(x), dim=-1)
+        return x

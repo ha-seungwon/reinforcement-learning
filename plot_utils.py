@@ -40,13 +40,16 @@ def plot_loss(loss_history, args):
     plt.close()
 
 def plot_rewards_all_models(all_rewards, args):
+
     model_colors = {
-        "MC": "#FF4500",          # OrangeRed
-        "TD": "#1E90FF",          # DodgerBlue
-        "SARSA": "#FF4500",       # ForestGreen ##228B22
-        "Q_learning": "#1E90FF",  # DarkGoldenRod FFB800
-        "DQN": "#FF4500"
+        "MC": "#FF4500",  # OrangeRed
+        "TD": "#1E90FF",  # DodgerBlue
+        "SARSA": "#32CD32",  # LimeGreen
+        "Q_learning": "#4169E1",  # RoyalBlue
+        "DQN": "#FF4500",  # BlueViolet 8A2BE2
+        "DQN_P": "#FFA500"  # Orange
     }
+
     env_styles = {
         "cliffwalking": "-",
         "frozenlake": "-",

@@ -1,5 +1,4 @@
 import gym
-
 from train import train
 from test import test
 from arguments import set_parameters
@@ -9,6 +8,8 @@ import time
 import psutil
 import torch
 import matplotlib.pyplot as plt
+
+
 def print_policy(optimal_policy, shape):
     policy_grid = np.zeros(shape, dtype=str)
     actions = ['^', '>', 'v', '<']
@@ -62,8 +63,8 @@ def model_test(args,test_name):
 
     elif  test_name == "model compare":
         ################### 모델 성능 단순 비교 ####################
-        env_list = ['frozenlake']  #cliffwalking  frozenlake taxi
-        model_list = ["TD","Q_learning","DQN"]# "MC", "TD" "SARSA", "Q_learning", "DQN"]
+        env_list = ['cliffwalking']  #cliffwalking  frozenlake taxi
+        model_list = ["TD", "Q_learning", "DQN"]# "MC", "TD" "SARSA", "Q_learning", "DQN"]
 
         all_rewards = {env: {} for env in env_list}
         for env in env_list:
@@ -71,7 +72,7 @@ def model_test(args,test_name):
                 args.env_name = env
                 args.model_name = model
                 args = set_parameters(args)
-                _, rewards_per_episode, loss_per_episode = train(args)
+                _, rewards_per_episode, loss_per_episode,_ = train(args)
                 #test(args)
                 all_rewards[env][model] = rewards_per_episode
                 # if model == 'DQN':
@@ -81,7 +82,7 @@ def model_test(args,test_name):
 
     elif  test_name == 'lr':
         ################## learning rate test ###################
-        env_list = ['frozenlake']#, 'frozenlake', 'taxi']
+        env_list = ['cliffwalking']#, 'frozenlake', 'taxi']
         model_list = ["MC", "TD"]
         learning_rates = [1, 0.01, 0.05]
         all_rewards = {env: {model: {} for model in model_list} for env in env_list}
@@ -100,13 +101,10 @@ def model_test(args,test_name):
         plot_rewards_mc_td_lr(all_rewards, args)
 
     elif test_name =='dqn_test':
-        #env = gym.make('CliffWalking-v0', max_episode_steps=300)
-        env = gym.make('Taxi-v3', max_episode_steps=200)
-        #env = gym.make('FrozenLake-v1', desc=None, map_name="4x4", is_slippery=False)
         start_time = time.time()
         initial_memory = get_memory_usage()
         args.env_name = 'frozenlake'
-        args.model_name = 'TD'
+        args.model_name = 'DQN'
         args = set_parameters(args)
         q_learning_q_table, q_learning_rewards, _, _ = train(args)
         q_learning_train_time = time.time() - start_time
@@ -116,18 +114,21 @@ def model_test(args,test_name):
         start_time = time.time()
         initial_memory = get_memory_usage()
         args.env_name = 'frozenlake'
-        args.model_name = 'DQN'
+        args.model_name = 'DQN_P'
         args = set_parameters(args)
         dqn_model, dqn_rewards, _, _ = train(args)
         dqn_train_time = time.time() - start_time
         dqn_memory_usage = get_memory_usage() - initial_memory
 
 
-        print(f'Q-learning training time: {q_learning_train_time:.2f} seconds')
-        print(f'Q-learning memory usage: {q_learning_memory_usage:.2f} MB')
+        print(f'DQN training time: {q_learning_train_time:.2f} seconds')
+        print(f'DQN memory usage: {q_learning_memory_usage:.2f} MB')
 
-        print(f'DQN training time: {dqn_train_time:.2f} seconds')
-        print(f'DQN memory usage: {dqn_memory_usage:.2f} MB')
+        print(f'DQN_P training time: {dqn_train_time:.2f} seconds')
+        print(f'DQN_P memory usage: {dqn_memory_usage:.2f} MB')
+
+
+
 
 
 

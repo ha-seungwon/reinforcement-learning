@@ -394,7 +394,7 @@ def train_dqn(args, env, rewards_per_episode,loss_per_episode):
         loss_per_episode.append(episode_loss)
 
         epsilon = max(0.01, epsilon * 0.995)
-        if episode % 100 == 0:
+        if episode % 1 == 0:
             print(
                 f"Episode {episode} done, episode reward: {episode_rewards}, mean reward per iteration: {episode_rewards / iterate}, iterations: {iterate}")
 
@@ -474,10 +474,3 @@ def optimize_model(args, memory, model, target_model, optimizer):
     loss.backward()
     optimizer.step()
     return loss.item()
-
-
-
-
-
-
-
