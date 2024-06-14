@@ -31,12 +31,12 @@ def main():
 
 
     # train
-    # _, rewards_per_episode, loss_per_episode,_ = train(args)
-    # test(args)
+    _, rewards_per_episode, loss_per_episode,_ = train(args)
+    test(args)
 
 
     # function for test and draw graphs
-    model_test(args,'model compare')
+    # model_test(args,'model compare')
 
 
 if __name__ == '__main__':
